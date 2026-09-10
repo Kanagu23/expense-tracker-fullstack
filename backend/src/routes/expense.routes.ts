@@ -1,4 +1,8 @@
-import app from "../app.js";
+import { Router } from "express";
 import { expensesHandler } from "../controllers/expense.controller.js";
 
-app.post("/api/expenses",expensesHandler)
+const expenseRouter = Router();
+
+expenseRouter.post("/", expensesHandler);
+
+export default expenseRouter;

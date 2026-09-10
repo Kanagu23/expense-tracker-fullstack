@@ -1,3 +1,7 @@
-export const expensesHandler=(req:Request,res:Response)=>{
-res.json({ status: "ok" });
-}
+import type { Request, Response } from "express";
+
+export const expensesHandler = (req: Request, res: Response) => {
+  res.status(201).json({
+    message: "Expense endpoint reached"
+  });
+};
