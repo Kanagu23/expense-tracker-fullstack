@@ -1,3 +1,3 @@
-const message: string = "Expense Tracker API";
+const port = process.env.PORT ?? 5000;
 
-console.log(message);
+console.log(`Server will run on port ${port}`);
