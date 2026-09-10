@@ -116,6 +116,16 @@ MONGODB_URI=...
 
 Secrets belong only in the backend environment. Sensitive backend configuration must not be exposed through `NEXT_PUBLIC_*` variables.
 
+Node.js provides built-in `.env` loading in modern versions. For this project, the backend uses Node's `--env-file=.env` option rather than adding a separate `dotenv` dependency.
+
+Example start script:
+
+```json
+"start": "node --env-file=.env dist/server.js"
+```
+
+This loads variables from `.env` into `process.env` before the application starts.
+
 ## 6. Domain Model
 
 V1 is a multi-user application.
@@ -433,7 +443,176 @@ User entered it:  2026-09-10
 
 These are different concepts. The V1 domain model should preserve expense occurrence date, while creation timestamps can be added separately during implementation (for example, `createdAt`/`updatedAt`).
 
-## 19. Engineering Principles
+## 19. Backend TypeScript and Express Foundation
+
+### TypeScript compilation model
+
+Node.js runs JavaScript, while TypeScript is compiled to JavaScript before Node executes it.
+
+```text
+TypeScript (.ts)
+      ↓ tsc
+JavaScript (.js)
+      ↓ Node.js
+Runtime
+```
+
+The backend uses `rootDir` as the source root and `outDir` as the compiled-output directory. For example:
+
+```text
+src/index.ts
+    ↓ tsc
+dist/index.js
+```
+
+### Important TypeScript compiler settings
+
+The backend uses modern Node/ES module settings:
+
+```json
+"module": "nodenext",
+"target": "esnext",
+"strict": true
+```
+
+Mental model:
+
+- `target` controls the JavaScript language level TypeScript generates.
+- `module` controls how TypeScript handles JavaScript modules such as `import` and `export`.
+- `strict` enables strict type-checking so unsafe assumptions are caught earlier.
+
+The project uses `"type": "module"` in `package.json` to align Node's module behavior with the modern ESM setup.
+
+### Node.js type definitions
+
+Installing:
+
+```bash
+npm install -D @types/node
+```
+
+does not install Node.js itself and does not compile TypeScript. Node.js is the runtime; `typescript` (`tsc`) is the compiler; `@types/node` supplies type definitions that allow TypeScript to understand Node APIs such as `process`, `Buffer`, `fs`, and `path`.
+
+### Express type definitions
+
+Similarly:
+
+```bash
+npm install express
+npm install -D @types/express
+```
+
+`express` is the runtime package. `@types/express` provides TypeScript type definitions so the compiler understands Express APIs.
+
+### Environment variables
+
+The application reads configuration such as the port from the environment rather than hard-coding it:
+
+```ts
+const port = process.env.PORT ?? 3000;
+```
+
+The important distinction is:
+
+```text
+Application code → uses process.env.PORT
+Environment       → decides the actual PORT value
+```
+
+This allows development, staging, and production environments to provide different configuration without changing application code.
+
+Modern Node.js can load `.env` files directly using the `--env-file` option. This project uses that built-in capability rather than adding `dotenv`.
+
+### Express health endpoint
+
+The first endpoint is:
+
+```http
+GET /health
+```
+
+with a response such as:
+
+```json
+{
+  "status": "ok"
+}
+```
+
+This provides a simple way to verify that the HTTP server and application are running.
+
+### Contextual typing in Express
+
+A route handler can be written without explicitly annotating `req` and `res`:
+
+```ts
+app.get("/health", (req, res) => {
+  res.json({ status: "ok" });
+});
+```
+
+Express's `app.get()` API provides the expected handler type, so TypeScript can infer the types of `req` and `res` from that context. This is called **contextual typing** and is a form of type inference.
+
+### Application vs server startup separation
+
+The Express application and the HTTP server startup are intentionally separated:
+
+```text
+src/
+├── app.ts
+└── server.ts
+```
+
+`app.ts` owns the Express application configuration, middleware, and routes. It exports the configured application:
+
+```ts
+export default app;
+```
+
+`server.ts` imports the application and owns HTTP server startup:
+
+```ts
+import app from "./app.js";
+
+const port = process.env.PORT ?? 3000;
+
+app.listen(port, () => {
+  console.log(`Server will run on port ${port}`);
+});
+```
+
+The distinction is:
+
+```text
+app.ts
+  → What does the application do?
+
+server.ts
+  → How do we start the HTTP server?
+```
+
+This separation keeps application configuration independent from the mechanism used to start the HTTP server and gives us a cleaner foundation for testing and future architecture changes.
+
+### API Gateway consideration
+
+An API Gateway is useful when a system has multiple backend services and needs a single entry point for concerns such as routing, authentication, rate limiting, logging, or API versioning.
+
+The V1 Expense Tracker has a single Express backend, so introducing a separate API Gateway now would add complexity without a current requirement.
+
+The current separation of `app.ts` and `server.ts` is a useful foundation, but it is **not** an API Gateway. A future architecture could look like:
+
+```text
+Client
+  ↓
+API Gateway
+  ├── User Service
+  ├── Expense Service
+  └── Analytics Service
+```
+
+The project will introduce such architectural complexity only when actual requirements justify it.
+
+## 20. Engineering Principles
 
 The project should follow these principles throughout implementation:
 
@@ -448,7 +627,7 @@ The project should follow these principles throughout implementation:
 9. Test failure scenarios, not only happy paths.
 10. Evolve the architecture when actual requirements demand it.
 
-## 20. Development Method
+## 21. Development Method
 
 Every feature should follow this cycle:
 
@@ -486,7 +665,7 @@ Production-grade deployment
 Large-scale system design
 ```
 
-## 21. Initial Implementation Milestone
+## 22. Initial Implementation Milestone
 
 The first build milestone is project setup:
 
