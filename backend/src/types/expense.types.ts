@@ -1,4 +1,4 @@
-interface CreateExpenseRequest {
+export interface CreateExpenseRequest {
   amount: number;
   category: string;
   shopName?: string;
