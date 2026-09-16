@@ -9,6 +9,12 @@ const categories = [
   "education",
   "other",
 ];
+const paymentMethods=["cash",
+"upi",
+"credit card",
+"debit card",
+"bank transfer",
+"other"]
 const datePattern = /^\d{4}-\d{2}-\d{2}$/; //YYYY-MM-DD
 export const validateCreateExpense = (
   body: CreateExpenseRequest,
@@ -26,7 +32,6 @@ export const validateCreateExpense = (
   }
   if (
     body.category == null ||
-    body.category == undefined ||
     body.category == ""
   ) {
     return "Please select the valid category";
@@ -64,6 +69,17 @@ export const validateCreateExpense = (
   ) {
     return "Date must be a valid date";
   }
-
+ if (
+    body.paymentMethod == null ||
+    body.paymentMethod == ""
+  ) {
+    return "Please select the valid payment method";
+  }
+  if (typeof body.paymentMethod !== "string") {
+    return "paymentMethod must be a string";
+  }
+  if (!paymentMethods.includes(body.paymentMethod.toLowerCase())) {
+    return "Please select the valid payment method";
+  }
   return null;
 };
