@@ -9,12 +9,14 @@ const categories = [
   "education",
   "other",
 ];
-const paymentMethods=["cash",
-"upi",
-"credit card",
-"debit card",
-"bank transfer",
-"other"]
+const paymentMethods = [
+  "cash",
+  "upi",
+  "credit card",
+  "debit card",
+  "bank transfer",
+  "other",
+];
 const datePattern = /^\d{4}-\d{2}-\d{2}$/; //YYYY-MM-DD
 export const validateCreateExpense = (
   body: CreateExpenseRequest,
@@ -30,10 +32,7 @@ export const validateCreateExpense = (
   if (body.amount <= 0) {
     return "Amount must be greater than 0";
   }
-  if (
-    body.category == null ||
-    body.category == ""
-  ) {
+  if (body.category == null || body.category == "") {
     return "Please select the valid category";
   }
   if (typeof body.category !== "string") {
@@ -54,11 +53,16 @@ export const validateCreateExpense = (
   if (typeof body.date !== "string") {
     return "Date must be a string";
   }
+
   if (!datePattern.test(body.date)) {
     return "Date must be in YYYY-MM-DD format";
   }
- const [year, month, day] =
-  body.date.split("-").map(Number) as [number, number, number];
+
+  const [year, month, day] = body.date.split("-").map(Number) as [
+    number,
+    number,
+    number,
+  ];
 
   const parsedDate = new Date(year, month - 1, day);
 
@@ -69,16 +73,22 @@ export const validateCreateExpense = (
   ) {
     return "Date must be a valid date";
   }
- if (
-    body.paymentMethod == null ||
-    body.paymentMethod == ""
-  ) {
+
+  const today = new Date();
+
+  today.setHours(0, 0, 0, 0);
+  parsedDate.setHours(0, 0, 0, 0);
+
+  if (parsedDate > today) {
+    return "Expense date cannot be in the future";
+  }
+  if (body.paymentMethod == null || body.paymentMethod == "") {
     return "Please select the valid payment method";
   }
   if (typeof body.paymentMethod !== "string") {
     return "paymentMethod must be a string";
   }
-  if (!paymentMethods.includes(body.paymentMethod.toLowerCase())) {
+  if (!paymentMethods.includes(body.paymentMethod.trim().toLowerCase())) {
     return "Please select the valid payment method";
   }
   return null;
