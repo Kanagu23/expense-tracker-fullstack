@@ -52,20 +52,15 @@ export const validateCreateExpense = (
   if (!datePattern.test(body.date)) {
     return "Date must be in YYYY-MM-DD format";
   }
-  const parsedDate = new Date(`${body.date}T00:00:00`);
-
-  if (Number.isNaN(parsedDate.getTime())) {
-    return "Date must be a valid date";
-  }
  const [year, month, day] =
   body.date.split("-").map(Number) as [number, number, number];
 
-  const parsedDated = new Date(year, month - 1, day);
+  const parsedDate = new Date(year, month - 1, day);
 
   if (
-    parsedDated.getFullYear() !== year ||
-    parsedDated.getMonth() !== month - 1 ||
-    parsedDated.getDate() !== day
+    parsedDate.getFullYear() !== year ||
+    parsedDate.getMonth() !== month - 1 ||
+    parsedDate.getDate() !== day
   ) {
     return "Date must be a valid date";
   }
