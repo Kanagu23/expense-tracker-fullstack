@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "start": "node --env-file=.env dist/server.js",
+    "start": "node --watch --env-file=.env dist/server.js",
     "dev":"npm run build && npm start",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
