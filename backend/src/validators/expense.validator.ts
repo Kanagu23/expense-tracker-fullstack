@@ -36,7 +36,7 @@ export const validateCreateExpense = (
   if (!categories.includes(body.category.toLowerCase())) {
     return "Please select the valid category";
   }
-  if (body.shopName !== null && body.shopName !== "") {
+  if (body.shopName !== null && body.shopName !== "" &&     body.shopName !== undefined) {
     if (typeof body.shopName !== "string") {
       return "shopName must be a string";
     }
