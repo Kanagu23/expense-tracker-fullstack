@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "start": "node --watch --env-file=.env dist/server.js",
-    "dev":"npm run build && npm start",
+    "dev": "npm run build && npm start",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -19,6 +19,7 @@
     "typescript": "^7.0.2"
   },
   "dependencies": {
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "mongoose": "^9.10.1"
   }
 }
