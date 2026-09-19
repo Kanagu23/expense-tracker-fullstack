@@ -1,7 +1,8 @@
 import mongoose from "mongoose";
 
 export const connectDatabase = async () => {
-    const uri = process.env.MONGODB_URI;
+  const uri = process.env.MONGODB_URI;
+
   if (!uri) {
     throw new Error("MONGODB_URI is not configured");
   }
@@ -13,4 +14,9 @@ export const connectDatabase = async () => {
     console.error("MongoDB connection failed", error);
     process.exit(1);
   }
+};
+
+export const disconnectDatabase = async () => {
+  await mongoose.connection.close();
+  console.log("MongoDB disconnected");
 };
